@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Medical Chatbot</title>
+    
+    <!-- Apply theme immediately to prevent flash -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('chatbot-theme');
+                if (savedTheme === 'light') {
+                    document.documentElement.classList.add('light-theme');
+                }
+            } catch (e) {
+                console.warn('Could not access localStorage:', e);
+            }
+        })();
+    </script>
+    
+    <!-- Preconnect for faster loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/css/bootstrap.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth.css') }}">
+</head>
+
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="toggleTheme" title="Toggle theme" aria-label="Toggle dark/light theme">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="auth-container">
+        <!-- Left Side - Branding -->
+        <div class="auth-branding">
+            <div class="branding-content">
+                <div class="brand-logo">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h1>Medical Chatbot</h1>
+                <p>Your AI-powered health assistant. Get instant answers to your health questions 24/7.</p>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>24/7 Health Support</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Instant Responses</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Secure & Private</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Evidence-Based Information</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="branding-footer">
+                <p>&copy; 2024 Medical Chatbot. All rights reserved.</p>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form -->
+        <div class="auth-form-container">
+            <div class="auth-form-wrapper">
+                <div class="auth-header">
+                    <h2>Welcome Back</h2>
+                    <p>Please sign in to your account</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alertMessage" class="alert-message" style="display: none;">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="alertText"></span>
+                    <button class="alert-close" onclick="hideAlert()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form id="loginForm" class="auth-form" novalidate>
+                    <!-- Email Field -->
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="Enter your email"
+                                   autocomplete="email"
+                                   required>
+                            <i class="fas fa-check-circle input-valid-icon"></i>
+                        </div>
+                        <span class="error-message" id="emailError"></span>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password"
+                                   required
+                                   minlength="8">
+                            <button type="button" class="password-toggle" onclick="togglePassword('password')" title="Toggle password visibility" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="passwordError"></span>
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="form-options">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">Remember me</span>
+                        </label>
+                        <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-primary" id="loginBtn">
+                        <span class="btn-text">Sign In</span>
+                        <span class="btn-loader" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+
+                <!-- Social Login -->
+                <div class="social-login">
+                    <button type="button" class="btn-social google" onclick="socialLogin('google')">
+                        <i class="fab fa-google"></i>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" class="btn-social facebook" onclick="socialLogin('facebook')">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Facebook</span>
+                    </button>
+                    <button type="button" class="btn-social twitter" onclick="socialLogin('twitter')">
+                        <i class="fab fa-twitter"></i>
+                        <span>Twitter</span>
+                    </button>
+                </div>
+
+                <!-- Register Link -->
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="/register">Create Account</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-notification" role="alert" aria-live="assertive">
+        <i class="toast-icon fas fa-info-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <script>
+    $(document).ready(function() {
+        const $body = $("body");
+        const $themeBtn = $("#toggleTheme");
+        const $loginForm = $("#loginForm");
+
+        // ==========================================
+        // Theme Management
+        // ==========================================
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('chatbot-theme');
+            if (savedTheme === 'light') {
+                $body.addClass('light-theme');
+                $themeBtn.find('i').removeClass('fa-moon').addClass('fa-sun');
+            }
+        }
+
+        function toggleTheme() {
+            const isLight = $body.hasClass('light-theme');
+            if (isLight) {
+                $body.removeClass('light-theme');
+                $themeBtn.find('i').removeClass('fa-sun').addClass('fa-moon');
+                localStorage.setItem('chatbot-theme', 'dark');
+                showToast("Dark theme enabled", "info");
+            } else {
+                $body.addClass('light-theme');
+                $themeBtn.find('i').removeClass('fa-moon').addClass('fa-sun');
+                localStorage.setItem('chatbot-theme', 'light');
+                showToast("Light theme enabled", "info");
+            }
+        }
+
+        loadTheme();
+        $themeBtn.on("click", toggleTheme);
+
+        // ==========================================
+        // Form Validation
+        // ==========================================
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        function showError(fieldId, message) {
+            const $field = $(`#${fieldId}`);
+            const $error = $(`#${fieldId}Error`);
+            $field.addClass('invalid').removeClass('valid');
+            $error.text(message).addClass('show');
+        }
+
+        function showSuccess(fieldId) {
+            const $field = $(`#${fieldId}`);
+            const $error = $(`#${fieldId}Error`);
+            $field.removeClass('invalid').addClass('valid');
+            $error.removeClass('show');
+        }
+
+        function clearValidation(fieldId) {
+            const $field = $(`#${fieldId}`);
+            const $error = $(`#${fieldId}Error`);
+            $field.removeClass('invalid valid');
+            $error.removeClass('show');
+        }
+
+        // Real-time validation
+        $("#email").on("blur", function() {
+            const value = $(this).val().trim();
+            if (!value) {
+                showError('email', 'Email is required');
+            } else if (!validateEmail(value)) {
+                showError('email', 'Please enter a valid email address');
+            } else {
+                showSuccess('email');
+            }
+        });
+
+        $("#password").on("blur", function() {
+            const value = $(this).val();
+            if (!value) {
+                showError('password', 'Password is required');
+            } else if (value.length < 8) {
+                showError('password', 'Password must be at least 8 characters');
+            } else {
+                showSuccess('password');
+            }
+        });
+
+        // Clear validation on focus
+        $("input").on("focus", function() {
+            clearValidation($(this).attr('id'));
+        });
+
+        // Form submission
+        $loginForm.on("submit", function(e) {
+            e.preventDefault();
+
+            const email = $("#email").val().trim();
+            const password = $("#password").val();
+            let isValid = true;
+
+            // Validate email
+            if (!email) {
+                showError('email', 'Email is required');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showError('email', 'Please enter a valid email address');
+                isValid = false;
+            } else {
+                showSuccess('email');
+            }
+
+            // Validate password
+            if (!password) {
+                showError('password', 'Password is required');
+                isValid = false;
+            } else if (password.length < 8) {
+                showError('password', 'Password must be at least 8 characters');
+                isValid = false;
+            } else {
+                showSuccess('password');
+            }
+
+            if (isValid) {
+                // Show loading state
+                const $btn = $("#loginBtn");
+                $btn.prop('disabled', true);
+                $btn.find('.btn-text').hide();
+                $btn.find('.btn-loader').show();
+
+                // Simulate API call (replace with actual login logic)
+                setTimeout(function() {
+                    // On success - redirect to chat
+                    // window.location.href = '/chat';
+                    
+                    // For demo - show success
+                    showToast("Login successful! Redirecting...", "success");
+                    
+                    setTimeout(function() {
+                        // Redirect to chat page
+                        window.location.href = '/chat';
+                    }, 1500);
+
+                }, 2000);
+
+                // On error:
+                // $btn.prop('disabled', false);
+                // $btn.find('.btn-text').show();
+                // $btn.find('.btn-loader').hide();
+                // showAlert('Invalid email or password', 'error');
+            }
+        });
+
+        // ==========================================
+        // Utility Functions
+        // ==========================================
+        function showToast(message, type = 'info') {
+            const $toast = $("#toast");
+            const $toastMessage = $("#toastMessage");
+            const $toastIcon = $toast.find('.toast-icon');
+            
+            $toast.removeClass('success error info').addClass(type);
+            $toastMessage.text(message);
+            
+            // Update icon
+            $toastIcon.removeClass('fa-check-circle fa-exclamation-circle fa-info-circle');
+            if (type === 'success') {
+                $toastIcon.addClass('fa-check-circle');
+            } else if (type === 'error') {
+                $toastIcon.addClass('fa-exclamation-circle');
+            } else {
+                $toastIcon.addClass('fa-info-circle');
+            }
+            
+            $toast.addClass('show');
+            setTimeout(() => $toast.removeClass('show'), 3000);
+        }
+
+        // Keyboard shortcut for theme
+        $(document).on('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    });
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+        const $field = $(`#${fieldId}`);
+        const $icon = $field.siblings('.password-toggle').find('i');
+        
+        if ($field.attr('type') === 'password') {
+            $field.attr('type', 'text');
+            $icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            $field.attr('type', 'password');
+            $icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    }
+
+    // Social login handlers
+    function socialLogin(provider) {
+        console.log('Social login with:', provider);
+        // Implement social login logic
+    }
+
+    // Alert functions
+    function showAlert(message, type = 'info') {
+        const $alert = $("#alertMessage");
+        const $alertText = $("#alertText");
+        $alert.removeClass('success error info').addClass(type);
+        $alertText.text(message);
+        $alert.slideDown(300);
+    }
+
+    function hideAlert() {
+        $("#alertMessage").slideUp(300);
+    }
+    </script>
+</body>
+</html>
