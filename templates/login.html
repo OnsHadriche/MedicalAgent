@@ -298,6 +298,7 @@
                 showSuccess('email');
             }
 
+
             // Validate password
             if (!password) {
                 showError('password', 'Password is required');
@@ -315,27 +316,29 @@
                 $btn.prop('disabled', true);
                 $btn.find('.btn-text').hide();
                 $btn.find('.btn-loader').show();
-
-                // Simulate API call (replace with actual login logic)
-                setTimeout(function() {
-                    // On success - redirect to chat
-                    // window.location.href = '/chat';
-                    
-                    // For demo - show success
+                $.ajax({
+                    url:"/login",
+                    method:'POST',
+                    contentType:'application/json',
+                    data:JSON.stringify({
+                        email:email,
+                        password:password,
+                        remember: $("#remember").is(':checked')
+                    }),
+                    success: function(response) {
+                    console.log("✅ Success:", response);
                     showToast("Login successful! Redirecting...", "success");
-                    
-                    setTimeout(function() {
-                        // Redirect to chat page
-                        window.location.href = '/chat';
-                    }, 1500);
-
-                }, 2000);
-
-                // On error:
-                // $btn.prop('disabled', false);
-                // $btn.find('.btn-text').show();
-                // $btn.find('.btn-loader').hide();
-                // showAlert('Invalid email or password', 'error');
+                    setTimeout(() => window.location.href = response.redirect, 1500);
+                    },
+                    error: function(xhr) {
+                        console.log("❌ Error:", xhr.responseJSON);
+                        const msg = xhr.responseJSON?.message || 'Login failed';
+                        showAlert(msg, 'error');
+                        $btn.prop('disabled', false);
+                        $btn.find('.btn-text').show();
+                        $btn.find('.btn-loader').hide();
+                    }
+                });
             }
         });
 
